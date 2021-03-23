@@ -23,7 +23,6 @@ def scrape():
     scrape_with_crochet()
     return jsonify(output_data)
     
-
 @app.route('/api/requests/<string:term>')
 def search_term(term):
     url = 'https://ikman.lk/data/serp'
