@@ -1,5 +1,5 @@
 from flask import Flask, jsonify
-from business.web_scrapy_manager import WebScraper
+from business.riyasewana_spider import RiyasewanaSpider
 from scrapy.crawler import CrawlerRunner
 from scrapy.signalmanager import dispatcher
 import crochet
@@ -45,8 +45,8 @@ def search_term(term):
 @crochet.wait_for(timeout=10.0)
 def scrape_with_crochet():
     dispatcher.connect(_crawler_result, signal=signals.item_scraped)
-    eventual = crawl_runner.crawl(WebScraper)
-    return eventual
+    riya_sewana = crawl_runner.crawl(RiyasewanaSpider)
+    return riya_sewana
 
 
 def _crawler_result(item, response, spider):
