@@ -1,7 +1,7 @@
 import scrapy
 
 
-class NanotekSpider(scrapy.Spider):
+class WinsoftSpider(scrapy.Spider):
     name = "winsoft_lk"
     start_urls = [
         'https://winsoft.lk/catalogsearch/result//?q=asus',
