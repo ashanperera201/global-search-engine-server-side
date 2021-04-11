@@ -48,7 +48,7 @@ def scrape_with_crochet():
     dispatcher.connect(_crawler_result, signal=signals.item_scraped)
     xa = {RiyasewanaSpider,WinsoftSpider}
     for x in xa:
-        riya_sewana = crawl_runner.crawl(x)
+        riya_sewana = crawl_runner.crawl(x, category="es-8")
         # print (riya_sewana)
         return riya_sewana
     

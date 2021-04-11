@@ -4,8 +4,12 @@ import scrapy
 class RiyasewanaSpider(scrapy.Spider):
     name = "riyasewana_com"
     start_urls = [
-        'https://riyasewana.com/search/corolla',
+        'https://riyasewana.com/',
     ]
+
+    def __init__(self, category=None, *args, **kwargs):
+        super(RiyasewanaSpider, self).__init__(*args, **kwargs)
+        self.start_urls = [f'https://riyasewana.com/search/{category}']
 
     def parse(self, response):
         for riyasewana in response.css('li.item.round'):
