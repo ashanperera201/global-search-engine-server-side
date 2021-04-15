@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_cors import cross_origin
 from business.riyasewana_spider import RiyasewanaSpider
 from business.winsoft_spider import WinsoftSpider
 from scrapy.crawler import CrawlerRunner
@@ -20,6 +21,7 @@ crawl_runner = CrawlerRunner()
 
 
 @app.route("/scrape")
+@cross_origin()
 def scrape():
     scrape_with_crochet()
     return jsonify(output_data)
