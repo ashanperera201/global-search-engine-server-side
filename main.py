@@ -19,9 +19,9 @@ output_data = []
 crawl_runner = CrawlerRunner()
 
 
-@app.route("/scrape")
-def scrape():
-    scrape_with_crochet()
+@app.route("/scrape/<string:term>")
+def scrape(term):
+    scrape_with_crochet(term)
     return jsonify(output_data)
     
 @app.route('/api/requests/<string:term>')
@@ -44,11 +44,13 @@ def search_term(term):
 
 
 @crochet.wait_for(timeout=10.0)
-def scrape_with_crochet():
+def scrape_with_crochet(search):
     dispatcher.connect(_crawler_result, signal=signals.item_scraped)
     xa = {RiyasewanaSpider,WinsoftSpider}
+    riya_sewana = []
     for x in xa:
-        riya_sewana = crawl_runner.crawl(x, category="es-8")
+        # riya_sewana = crawl_runner.crawl(x, category="es-8")
+        riya_sewana = crawl_runner.crawl(x, category=search)
         # print (riya_sewana)
         return riya_sewana
     
