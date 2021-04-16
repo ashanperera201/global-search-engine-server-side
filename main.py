@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_cors import cross_origin
 from business.riyasewana_spider import RiyasewanaSpider
 from business.winsoft_spider import WinsoftSpider
 from scrapy.crawler import CrawlerRunner
@@ -20,6 +21,7 @@ crawl_runner = CrawlerRunner()
 
 
 @app.route("/scrape/<string:term>")
+@cross_origin()
 def scrape(term):
     scrape_with_crochet(term)
     return jsonify(output_data)
@@ -46,7 +48,7 @@ def search_term(term):
 @crochet.wait_for(timeout=10.0)
 def scrape_with_crochet(search):
     dispatcher.connect(_crawler_result, signal=signals.item_scraped)
-    xa = {RiyasewanaSpider,WinsoftSpider}
+    xa = {RiyasewanaSpider}
     riya_sewana = []
     for x in xa:
         # riya_sewana = crawl_runner.crawl(x, category="es-8")
