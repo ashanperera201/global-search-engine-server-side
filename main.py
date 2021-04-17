@@ -23,24 +23,31 @@ crawl_runner = CrawlerRunner()
 @app.route("/scrape/<string:term>")
 @cross_origin()
 def scrape(term):
+
+    samp = []
     scrape_with_crochet(term)
-    return jsonify(output_data)
-    
-@app.route('/api/requests/<string:term>')
+    retVal2 = search_term(term)
+
+    samp.append(output_data)
+    samp.append(retVal2)
+    return jsonify(samp)
+
+
+@app.route("/api/requests/<string:term>")
 def search_term(term):
-    url = 'https://ikman.lk/data/serp'
+    url = "https://ikman.lk/data/serp"
     params = {
-            "top_ads": 1,
-            "spotlights": 5,
-            "sort": "relevance",
-            "buy_now": 0,
-            "urgent": 0,
-            "categorySlug": "van",
-            "locationSlug": "colombo",
-            "category": 391,
-            "query": term,
-            "page": 1             
-        }
+        "top_ads": 1,
+        "spotlights": 5,
+        "sort": "relevance",
+        "buy_now": 0,
+        "urgent": 0,
+        "categorySlug": "van",
+        "locationSlug": "colombo",
+        "category": 391,
+        "query": term,
+        "page": 1,
+    }
     result = requests.get(url, params)
     return result.json()
 
@@ -55,7 +62,7 @@ def scrape_with_crochet(search):
         riya_sewana = crawl_runner.crawl(x, category=search)
         # print (riya_sewana)
         return riya_sewana
-    
+
 
 def _crawler_result(item, response, spider):
     output_data.append(dict(item))
