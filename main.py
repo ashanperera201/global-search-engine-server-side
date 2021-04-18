@@ -24,13 +24,11 @@ crawl_runner = CrawlerRunner()
 @cross_origin()
 def scrape(term):
 
-    samp = []
     scrape_with_crochet(term)
     retVal2 = search_term(term)
 
-    samp.append(output_data)
-    samp.append(retVal2)
-    return jsonify(samp)
+    stcructs = structuredata(output_data, retVal2)
+    return jsonify(stcructs)
 
 
 @app.route("/api/requests/<string:term>")
@@ -67,5 +65,29 @@ def scrape_with_crochet(search):
 def _crawler_result(item, response, spider):
     output_data.append(dict(item))
 
+def structuredata(riyasewana, ikman):
+
+    ikmanAds = []
+    for ads in ikman['ads']:
+        tmpArr = {}
+        tmpArr = {
+            'image' : ads['imgUrl'],
+            'link' : 'https://ikman.lk/en/ad/' + ads['slug'],
+            'name' : ads['title'],
+            'price': ads['price'],
+        }
+        ikmanAds.append(tmpArr)
+    
+    for ads in riyasewana:
+        tmpArr = {}
+        tmpArr = {
+            'image' : ads['image'],
+            'link' : ads['link'],
+            'name' : ads['name'],
+            'price': ads['price'],
+        }
+        ikmanAds.append(tmpArr)
+
+    return ikmanAds
 
 app.run(port=5000)
