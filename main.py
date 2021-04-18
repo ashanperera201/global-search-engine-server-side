@@ -34,14 +34,15 @@ def scrape(term):
 @app.route("/api/requests/<string:term>")
 def search_term(term):
     url = "https://ikman.lk/data/serp"
+    term = term.replace("-", "")
     params = {
         "top_ads": 1,
         "spotlights": 5,
         "sort": "relevance",
         "buy_now": 0,
         "urgent": 0,
-        "categorySlug": "van",
-        "locationSlug": "colombo",
+        "categorySlug": "vehicles",
+        "locationSlug": "sri-lanka",
         "category": 391,
         "query": term,
         "page": 1,
@@ -74,7 +75,7 @@ def structuredata(riyasewana, ikman):
             'image' : ads['imgUrl'],
             'link' : 'https://ikman.lk/en/ad/' + ads['slug'],
             'name' : ads['title'],
-            'price': ads['price'],
+            'price': "Not Mentioned" if 'price' not in ads else ads['price'],
         }
         ikmanAds.append(tmpArr)
     
