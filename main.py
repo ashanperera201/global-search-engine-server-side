@@ -23,7 +23,7 @@ crawl_runner = CrawlerRunner()
 @app.route("/scrape/<string:term>")
 @cross_origin()
 def scrape(term):
-
+    output_data.clear()
     scrape_with_crochet(term)
     scrape_with_patpat(term)
     retVal2 = search_term(term)
