@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 from flask_cors import cross_origin
 from business.riyasewana_spider import RiyasewanaSpider
-from business.winsoft_spider import WinsoftSpider
+from business.patpat_spider import PatPatSpider
 from scrapy.crawler import CrawlerRunner
 from scrapy.signalmanager import dispatcher
 import crochet
@@ -25,6 +25,7 @@ crawl_runner = CrawlerRunner()
 def scrape(term):
 
     scrape_with_crochet(term)
+    scrape_with_patpat(term)
     retVal2 = search_term(term)
 
     stcructs = structuredata(output_data, retVal2)
@@ -61,6 +62,18 @@ def scrape_with_crochet(search):
         riya_sewana = crawl_runner.crawl(x, category=search)
         # print (riya_sewana)
         return riya_sewana
+
+@crochet.wait_for(timeout=10.0)
+def scrape_with_patpat(search):
+    dispatcher.connect(_crawler_result, signal=signals.item_scraped)
+    xa = {PatPatSpider}
+    patpat = []
+    search = search.replace("-", "")
+    for x in xa:
+        # patpat = crawl_runner.crawl(x, category="es-8")
+        patpat = crawl_runner.crawl(x, category=search)
+        # print (patpat)
+        return patpat
 
 
 def _crawler_result(item, response, spider):
