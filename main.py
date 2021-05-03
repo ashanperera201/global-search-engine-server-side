@@ -8,6 +8,7 @@ import crochet
 from scrapy import signals
 import requests
 import json
+import random
 
 crochet.setup()
 
@@ -26,14 +27,14 @@ def scrape(term):
     output_data.clear()
     scrape_with_crochet(term)
     scrape_with_patpat(term)
-    retVal2 = search_term(term)
+    ikman_ret = scrape_with_ikman(term)
 
-    stcructs = structuredata(output_data, retVal2)
+    stcructs = structuredata(output_data, ikman_ret)
     return jsonify(stcructs)
 
 
 @app.route("/api/requests/<string:term>")
-def search_term(term):
+def scrape_with_ikman(term):
     url = "https://ikman.lk/data/serp"
     term = term.replace("-", "")
     params = {
@@ -79,8 +80,8 @@ def scrape_with_patpat(search):
 def _crawler_result(item, response, spider):
     output_data.append(dict(item))
 
-def structuredata(riyasewana, ikman):
-
+def structuredata(scrape, ikman):
+    finalArr = []
     ikmanAds = []
     for ads in ikman['ads']:
         tmpArr = {}
@@ -92,7 +93,11 @@ def structuredata(riyasewana, ikman):
         }
         ikmanAds.append(tmpArr)
     
-    for ads in riyasewana:
+    firstIkman = ikmanAds[:10]
+    del ikmanAds[:10]
+    adsCount = len(ikmanAds)
+
+    for ads in scrape:
         tmpArr = {}
         tmpArr = {
             'image' : ads['image'],
@@ -102,6 +107,28 @@ def structuredata(riyasewana, ikman):
         }
         ikmanAds.append(tmpArr)
 
-    return ikmanAds
+    firstRiyasewana = ikmanAds[adsCount:adsCount+10]
+    del ikmanAds[adsCount:adsCount:adsCount+10]
+
+
+    totalFirst = [];
+
+    for first in firstIkman:
+        totalFirst.append(first)
+
+    for first in firstRiyasewana:
+        totalFirst.append(first)
+
+    random.shuffle(totalFirst)
+
+    totArray = []
+
+    for first in totalFirst:
+        totArray.append(first)
+
+    for last in ikmanAds:
+        totArray.append(last)
+
+    return totArray
 
 app.run(port=5000)
