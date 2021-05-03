@@ -89,7 +89,7 @@ def structuredata(scrape, ikman):
             'image' : ads['imgUrl'],
             'link' : 'https://ikman.lk/en/ad/' + ads['slug'],
             'name' : ads['title'],
-            'price': "Not Mentioned" if 'price' not in ads else ads['price'],
+            'price': "Not Mentioned" if 'price' not in ads else ads['price'].replace("Rs", "Rs.").strip(),
         }
         ikmanAds.append(tmpArr)
     
@@ -103,7 +103,7 @@ def structuredata(scrape, ikman):
             'image' : ads['image'],
             'link' : ads['link'],
             'name' : ads['name'],
-            'price': ads['price'],
+            'price': ads['price'].replace("LKR", "Rs.").strip(),
         }
         ikmanAds.append(tmpArr)
 
