@@ -18,7 +18,8 @@ class PatPatSpider(scrapy.Spider):
                 "name": vehicle.css("h4.result-title.mb-1>span::text").get(),
                 "price": vehicle.css("h3.clearfix.my-1>label.w-100::text").get(),
                 "link": vehicle.css("div.col-12.d-none.d-lg-block>a.mb-1").attrib["href"],
-                "image" : vehicle.css('div.result-img.col-lg-3.px-lg-0>a>img').attrib['src']
+                "image" : vehicle.css('div.result-img.col-lg-3.px-lg-0>a>img').attrib['src'],
+                "label" : "Patpat"
             }
 
         next_page_atr = response.css('li.page-item>a[rel="next"]')

@@ -90,6 +90,7 @@ def structuredata(scrape, ikman):
             'link' : 'https://ikman.lk/en/ad/' + ads['slug'],
             'name' : ads['title'],
             'price': "Not Mentioned" if 'price' not in ads else ads['price'].replace("Rs", "Rs.").strip(),
+            'label': "Ikman"
         }
         ikmanAds.append(tmpArr)
     
@@ -104,6 +105,7 @@ def structuredata(scrape, ikman):
             'link' : ads['link'],
             'name' : ads['name'],
             'price': ads['price'].replace("LKR", "Rs.").strip(),
+            'label': ads['label']
         }
         ikmanAds.append(tmpArr)
 

@@ -1,4 +1,6 @@
 import scrapy
+import time
+import datetime
 
 
 class RiyasewanaSpider(scrapy.Spider):
@@ -13,11 +15,15 @@ class RiyasewanaSpider(scrapy.Spider):
 
     def parse(self, response):
         for riyasewana in response.css('li.item.round'):
+            actualtime = riyasewana.css('div.boxtext>div.boxintxt.s::text').get()
             yield {
                 'name': riyasewana.css('h2.more>a::text').get(),
                 'price': riyasewana.css('div.boxtext>div.boxintxt.b::text').get(),
                 'link': riyasewana.css('h2.more>a').attrib['href'],
-                'image': 'https:' + riyasewana.css('div.imgbox>a>img').attrib['src']
+                'image': 'https:' + riyasewana.css('div.imgbox>a>img').attrib['src'],
+                'time': time.mktime(datetime.datetime.strptime(actualtime.strip(), "%Y-%m-%d").timetuple()),
+                'date': actualtime.strip(),
+                'label': "Riyasewana"
             }
 
         # next_page_atr = response.css('li>a[rel="next"]')
