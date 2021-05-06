@@ -4,6 +4,7 @@ from business.riyasewana_spider import RiyasewanaSpider
 from business.patpat_spider import PatPatSpider
 from scrapy.crawler import CrawlerRunner
 from scrapy.signalmanager import dispatcher
+from flaskext.mysql import MySQL
 import crochet
 from scrapy import signals
 import requests
@@ -13,6 +14,14 @@ import random
 crochet.setup()
 
 app = Flask(__name__)
+mysql = MySQL()
+
+# MySQL configurations
+app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'drowssap'
+app.config['MYSQL_DATABASE_DB'] = 'glb_search_eng'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+mysql.init_app(app)
 
 
 output_data = []
@@ -51,6 +60,54 @@ def scrape_with_ikman(term):
     }
     result = requests.get(url, params)
     return result.json()
+
+
+@app.route("/api/searchTerm/<string:term>")
+@cross_origin()
+def postSearchTerm(term):
+    output_data.clear()
+    scrape_with_crochet(term)
+    scrape_with_patpat(term)
+    ikman_ret = scrape_with_ikman(term)
+
+    stcructs = structuredata(output_data, ikman_ret)
+    return jsonify(stcructs)
+
+
+@app.route("/api/siteVisit/<string:website>")
+@cross_origin()
+def postSiteVisit(website):
+    output_data.clear()
+    scrape_with_crochet(term)
+    scrape_with_patpat(term)
+    ikman_ret = scrape_with_ikman(term)
+
+    stcructs = structuredata(output_data, ikman_ret)
+    return jsonify(stcructs)
+
+
+@app.route("/api/chart/mostSearch")
+@cross_origin()
+def getMostSearchedChatData(term):
+    output_data.clear()
+    scrape_with_crochet(term)
+    scrape_with_patpat(term)
+    ikman_ret = scrape_with_ikman(term)
+
+    stcructs = structuredata(output_data, ikman_ret)
+    return jsonify(stcructs)
+
+
+@app.route("/api/chart/mostVisit")
+@cross_origin()
+def getMostVisitedChatData(term):
+    output_data.clear()
+    scrape_with_crochet(term)
+    scrape_with_patpat(term)
+    ikman_ret = scrape_with_ikman(term)
+
+    stcructs = structuredata(output_data, ikman_ret)
+    return jsonify(stcructs)
 
 
 @crochet.wait_for(timeout=10.0)
@@ -112,7 +169,6 @@ def structuredata(scrape, ikman):
     firstRiyasewana = ikmanAds[adsCount:adsCount+10]
     del ikmanAds[adsCount:adsCount:adsCount+10]
 
-
     totalFirst = [];
 
     for first in firstIkman:
@@ -132,5 +188,6 @@ def structuredata(scrape, ikman):
         totArray.append(last)
 
     return totArray
+
 
 app.run(port=5000)
