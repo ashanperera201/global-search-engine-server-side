@@ -4,6 +4,8 @@ from data.search_term_repository import SearchTermRepository
 mostVisitedRepo = MostVisitedRepository()
 searchTermRepo = SearchTermRepository()
 
+
+
 class Charts:
 
     def __init__(self):
@@ -15,13 +17,13 @@ class Charts:
     def getMostVisitedSiteData(self):
         return mostVisitedRepo.getData
 
-    def saveSearchKeyword(self,term):
+    def saveSearchKeyword(self,term,mysql):
         try:
-            conn=mysql.connect()
+            conn = mysql.connect()
             cursor = conn.cursor(pymysql.cursors.DictCursor)
-            cursor.execute("INSERT INTO analytics_search_keyword VALUES")
-            rows = cursor.fetchall()
-            resp = jsonify(rows)
+            sql = "INSERT INTO analytics_search_keyword (search_keyword) VALUES (%s)"
+            val = (term)
+            cursor.execute(sql, val)
             resp.status_code=200
             return resp
         except Exception as e:

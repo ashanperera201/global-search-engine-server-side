@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import cross_origin
 from business.riyasewana_spider import RiyasewanaSpider
 from business.patpat_spider import PatPatSpider
@@ -37,12 +37,12 @@ chartManager = Charts()
 @app.route("/scrape/<string:term>")
 @cross_origin()
 def scrape(term):
+    saveSearchKeyword(term)
     output_data.clear()
     scrape_with_crochet(term)
     scrape_with_patpat(term)
     ikman_ret = scrape_with_ikman(term)
 
-    chartManager.saveSearchKeyword()
     stcructs = structuredata(output_data, ikman_ret)
     return jsonify(stcructs)
 
@@ -67,17 +67,12 @@ def scrape_with_ikman(term):
     return result.json()
 
 
-@app.route("/api/searchTerm", methods = ['POST'])
-@cross_origin()
-def postSearchTerm():
-
-    return 'success'
-
-
 @app.route("/api/siteVisit", methods = ['POST'])
 @cross_origin()
 def postSiteVisit():
     data = request.get_json()
+    print(data, file=sys.stdout)
+    saveSiteVisit(data.website_name)
     return 'success'
 
 
@@ -196,6 +191,40 @@ def structuredata(scrape, ikman):
         totArray.append(last)
 
     return totArray
+
+def saveSearchKeyword(term):
+    print('This is saveSearchKeyword', file=sys.stdout)
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        print(conn, file=sys.stdout)
+        sql = "INSERT INTO analytics_search_keyword (search_keyword) VALUES (%s)"
+        val = (term)
+        cursor.execute(sql, val)
+        conn.commit()
+    except Exception as e:
+        print(e, file=sys.stdout)
+    finally:
+        print('finally saveSearchKeyword', file=sys.stdout)
+        cursor.close()
+        conn.close()
+
+def saveSiteVisit(site):
+    print('This is saveSiteVisit', file=sys.stdout)
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        print(conn, file=sys.stdout)
+        sql = "INSERT INTO analytics_site_visits (website_name, visit_location) VALUES (%s,%s)"
+        val = (site, 'Colombo')
+        cursor.execute(sql, val)
+        conn.commit()
+    except Exception as e:
+        print(e, file=sys.stdout)
+    finally:
+        print('finally saveSearchKeyword', file=sys.stdout)
+        cursor.close()
+        conn.close()
 
 
 app.run(port=5000)
