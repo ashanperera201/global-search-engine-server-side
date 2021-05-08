@@ -5,5 +5,6 @@ Installation guide.
 <!-- install python -->
 <!-- install anaconda -->
 <!-- need to install scrappy, refer doc >> conda install -c conda-forge scrapy -->
-pip instlal flask
+pip install Flask
 pip install flask-cors
+pip install flask-mysql

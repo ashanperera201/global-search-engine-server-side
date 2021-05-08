@@ -10,6 +10,9 @@ from scrapy import signals
 import requests
 import json
 import random
+import pymysql
+import sys
+from business.charts_manager import Charts
 
 crochet.setup()
 
@@ -28,6 +31,7 @@ output_data = []
 
 
 crawl_runner = CrawlerRunner()
+chartManager = Charts()
 
 
 @app.route("/scrape/<string:term>")
@@ -38,6 +42,7 @@ def scrape(term):
     scrape_with_patpat(term)
     ikman_ret = scrape_with_ikman(term)
 
+    chartManager.saveSearchKeyword()
     stcructs = structuredata(output_data, ikman_ret)
     return jsonify(stcructs)
 
@@ -62,52 +67,55 @@ def scrape_with_ikman(term):
     return result.json()
 
 
-@app.route("/api/searchTerm/<string:term>")
+@app.route("/api/searchTerm", methods = ['POST'])
 @cross_origin()
-def postSearchTerm(term):
-    output_data.clear()
-    scrape_with_crochet(term)
-    scrape_with_patpat(term)
-    ikman_ret = scrape_with_ikman(term)
+def postSearchTerm():
 
-    stcructs = structuredata(output_data, ikman_ret)
-    return jsonify(stcructs)
+    return 'success'
 
 
-@app.route("/api/siteVisit/<string:website>")
+@app.route("/api/siteVisit", methods = ['POST'])
 @cross_origin()
-def postSiteVisit(website):
-    output_data.clear()
-    scrape_with_crochet(term)
-    scrape_with_patpat(term)
-    ikman_ret = scrape_with_ikman(term)
-
-    stcructs = structuredata(output_data, ikman_ret)
-    return jsonify(stcructs)
+def postSiteVisit():
+    data = request.get_json()
+    return 'success'
 
 
 @app.route("/api/chart/mostSearch")
 @cross_origin()
-def getMostSearchedChatData(term):
-    output_data.clear()
-    scrape_with_crochet(term)
-    scrape_with_patpat(term)
-    ikman_ret = scrape_with_ikman(term)
-
-    stcructs = structuredata(output_data, ikman_ret)
-    return jsonify(stcructs)
+def mostSearch():
+    print('This is standard output', file=sys.stdout)
+    try:
+        conn=mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT * FROM analytics_search_keyword")
+        rows = cursor.fetchall()
+        resp = jsonify(rows)
+        resp.status_code=200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
 
 
 @app.route("/api/chart/mostVisit")
 @cross_origin()
-def getMostVisitedChatData(term):
-    output_data.clear()
-    scrape_with_crochet(term)
-    scrape_with_patpat(term)
-    ikman_ret = scrape_with_ikman(term)
-
-    stcructs = structuredata(output_data, ikman_ret)
-    return jsonify(stcructs)
+def mostVisit():
+    try:
+        conn=mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT * FROM analytics_site_visits")
+        rows = cursor.fetchall()
+        resp = jsonify(rows)
+        resp.status_code=200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
 
 
 @crochet.wait_for(timeout=10.0)
