@@ -108,14 +108,14 @@ def mostVisit():
     try:
         conn=mysql.connect()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
-        cursor.execute("SELECT * FROM analytics_site_visits")
+        cursor.execute("SELECT website_name, COUNT(*) AS 'count' FROM analytics_site_visits GROUP BY (website_name)")
         rows = cursor.fetchall()
         for entry in rows:
             print(entry, file=sys.stdout)
-            barChartLabelsV.append(entry['search_keyword'])
-            barChartDataV.append(entry['count'])
+            barChartLabels.append(entry['search_keyword'])
+            barChartData.append(entry['count'])
         
-        resp = jsonify(rows)
+        resp = jsonify({"barChartLabels" : barChartLabels, "barChartData" : [{"data" : barChartData, "label" : "Count"}]})
         resp.status_code=200
         return resp
     except Exception as e:
@@ -123,7 +123,7 @@ def mostVisit():
     finally:
         cursor.close()
         conn.close()
-
+    
 
 @crochet.wait_for(timeout=10.0)
 def scrape_with_crochet(search):
