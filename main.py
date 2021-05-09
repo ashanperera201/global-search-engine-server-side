@@ -38,7 +38,7 @@ def scrape(term):
     saveSearchKeyword(term)
     output_data.clear()
     scrape_with_crochet(term)
-    #scrape_with_patpat(term)
+    scrape_with_patpat(term)
     ikman_ret = scrape_with_ikman(term)
 
     stcructs = structuredata(output_data, ikman_ret)
