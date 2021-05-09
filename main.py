@@ -80,12 +80,19 @@ def postSiteVisit():
 @cross_origin()
 def mostSearch():
     print('This is standard output', file=sys.stdout)
+    barChartLabels = []
+    barChartData = []
     try:
         conn=mysql.connect()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
-        cursor.execute("SELECT * FROM analytics_search_keyword")
+        cursor.execute("SELECT search_keyword, COUNT(*) AS 'count' FROM analytics_search_keyword GROUP BY (search_keyword)")
         rows = cursor.fetchall()
-        resp = jsonify(rows)
+        for entry in rows:
+            print(entry, file=sys.stdout)
+            barChartLabels.append(entry['search_keyword'])
+            barChartData.append(entry['count'])
+        
+        resp = jsonify({"barChartLabels" : barChartLabels, "barChartData" : [{"data" : barChartData, "label" : "Count"}]})
         resp.status_code=200
         return resp
     except Exception as e:
