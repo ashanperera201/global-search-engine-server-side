@@ -100,7 +100,7 @@ def mostSearch():
         conn.close()
 
 
-@app.route("/get-visited-data")
+@app.route("/api/chart/mostVisit")
 @cross_origin()
 def mostVisit():
     barChartLabelsV = []
