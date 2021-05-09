@@ -12,7 +12,6 @@ import json
 import random
 import pymysql
 import sys
-from business.charts_manager import Charts
 
 crochet.setup()
 
@@ -20,10 +19,10 @@ app = Flask(__name__)
 mysql = MySQL()
 
 # MySQL configurations
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'drowssap'
+app.config['MYSQL_DATABASE_USER'] = 'deepcrawler@deepdb'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'deep@crawler12345'
 app.config['MYSQL_DATABASE_DB'] = 'glb_search_eng'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+app.config['MYSQL_DATABASE_HOST'] = 'deepdb.mysql.database.azure.com'
 mysql.init_app(app)
 
 
@@ -31,7 +30,6 @@ output_data = []
 
 
 crawl_runner = CrawlerRunner()
-chartManager = Charts()
 
 
 @app.route("/scrape/<string:term>")
@@ -40,7 +38,7 @@ def scrape(term):
     saveSearchKeyword(term)
     output_data.clear()
     scrape_with_crochet(term)
-    scrape_with_patpat(term)
+    #scrape_with_patpat(term)
     ikman_ret = scrape_with_ikman(term)
 
     stcructs = structuredata(output_data, ikman_ret)
@@ -76,7 +74,7 @@ def postSiteVisit():
     return 'success'
 
 
-@app.route("/api/chart/mostSearch")
+@app.route("/get-searched-keywords")
 @cross_origin()
 def mostSearch():
     print('This is standard output', file=sys.stdout)
@@ -102,14 +100,21 @@ def mostSearch():
         conn.close()
 
 
-@app.route("/api/chart/mostVisit")
+@app.route("/get-visited-data")
 @cross_origin()
 def mostVisit():
+    barChartLabelsV = []
+    barChartDataV = []
     try:
         conn=mysql.connect()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
         cursor.execute("SELECT * FROM analytics_site_visits")
         rows = cursor.fetchall()
+        for entry in rows:
+            print(entry, file=sys.stdout)
+            barChartLabelsV.append(entry['search_keyword'])
+            barChartDataV.append(entry['count'])
+        
         resp = jsonify(rows)
         resp.status_code=200
         return resp
