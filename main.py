@@ -1,18 +1,29 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import cross_origin
 from business.riyasewana_spider import RiyasewanaSpider
 from business.patpat_spider import PatPatSpider
 from scrapy.crawler import CrawlerRunner
 from scrapy.signalmanager import dispatcher
+from flaskext.mysql import MySQL
 import crochet
 from scrapy import signals
 import requests
 import json
 import random
+import pymysql
+import sys
 
 crochet.setup()
 
 app = Flask(__name__)
+mysql = MySQL()
+
+# MySQL configurations
+app.config['MYSQL_DATABASE_USER'] = 'deepcrawler@deepdb'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'deep@crawler12345'
+app.config['MYSQL_DATABASE_DB'] = 'glb_search_eng'
+app.config['MYSQL_DATABASE_HOST'] = 'deepdb.mysql.database.azure.com'
+mysql.init_app(app)
 
 
 output_data = []
@@ -24,6 +35,7 @@ crawl_runner = CrawlerRunner()
 @app.route("/scrape/<string:term>")
 @cross_origin()
 def scrape(term):
+    saveSearchKeyword(term)
     output_data.clear()
     scrape_with_crochet(term)
     scrape_with_patpat(term)
@@ -52,6 +64,66 @@ def scrape_with_ikman(term):
     result = requests.get(url, params)
     return result.json()
 
+
+@app.route("/api/siteVisit", methods = ['POST'])
+@cross_origin()
+def postSiteVisit():
+    data = request.get_json()
+    print(data, file=sys.stdout)
+    saveSiteVisit(data.website_name)
+    return 'success'
+
+
+@app.route("/get-searched-keywords")
+@cross_origin()
+def mostSearch():
+    print('This is standard output', file=sys.stdout)
+    barChartLabels = []
+    barChartData = []
+    try:
+        conn=mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT search_keyword, COUNT(*) AS 'count' FROM analytics_search_keyword GROUP BY (search_keyword)")
+        rows = cursor.fetchall()
+        for entry in rows:
+            print(entry, file=sys.stdout)
+            barChartLabels.append(entry['search_keyword'])
+            barChartData.append(entry['count'])
+        
+        resp = jsonify({"barChartLabels" : barChartLabels, "barChartData" : [{"data" : barChartData, "label" : "Count"}]})
+        resp.status_code=200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route("/api/chart/mostVisit")
+@cross_origin()
+def mostVisit():
+    barChartLabelsV = []
+    barChartDataV = []
+    try:
+        conn=mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT website_name, COUNT(*) AS 'count' FROM analytics_site_visits GROUP BY (website_name)")
+        rows = cursor.fetchall()
+        for entry in rows:
+            print(entry, file=sys.stdout)
+            barChartLabels.append(entry['search_keyword'])
+            barChartData.append(entry['count'])
+        
+        resp = jsonify({"barChartLabels" : barChartLabels, "barChartData" : [{"data" : barChartData, "label" : "Count"}]})
+        resp.status_code=200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+    
 
 @crochet.wait_for(timeout=10.0)
 def scrape_with_crochet(search):
@@ -112,7 +184,6 @@ def structuredata(scrape, ikman):
     firstRiyasewana = ikmanAds[adsCount:adsCount+10]
     del ikmanAds[adsCount:adsCount:adsCount+10]
 
-
     totalFirst = [];
 
     for first in firstIkman:
@@ -132,5 +203,40 @@ def structuredata(scrape, ikman):
         totArray.append(last)
 
     return totArray
+
+def saveSearchKeyword(term):
+    print('This is saveSearchKeyword', file=sys.stdout)
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        print(conn, file=sys.stdout)
+        sql = "INSERT INTO analytics_search_keyword (search_keyword) VALUES (%s)"
+        val = (term)
+        cursor.execute(sql, val)
+        conn.commit()
+    except Exception as e:
+        print(e, file=sys.stdout)
+    finally:
+        print('finally saveSearchKeyword', file=sys.stdout)
+        cursor.close()
+        conn.close()
+
+def saveSiteVisit(site):
+    print('This is saveSiteVisit', file=sys.stdout)
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        print(conn, file=sys.stdout)
+        sql = "INSERT INTO analytics_site_visits (website_name, visit_location) VALUES (%s,%s)"
+        val = (site, 'Colombo')
+        cursor.execute(sql, val)
+        conn.commit()
+    except Exception as e:
+        print(e, file=sys.stdout)
+    finally:
+        print('finally saveSearchKeyword', file=sys.stdout)
+        cursor.close()
+        conn.close()
+
 
 app.run(port=5000)
